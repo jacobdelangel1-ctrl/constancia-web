@@ -1,41 +1,118 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Generador de Constancia</title>
+<meta charset="UTF-8">
+<title>Constancia Fiscal</title>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f0f2f5;
+  margin: 0;
+}
+
+/* Header estilo gobierno */
+.header {
+  background: #611232;
+  color: white;
+  padding: 15px;
+  text-align: center;
+  font-weight: bold;
+}
+
+/* Contenedor tipo documento */
+.container {
+  background: white;
+  width: 90%;
+  max-width: 400px;
+  margin: 30px auto;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+/* Título */
+h2 {
+  color: #611232;
+  text-align: center;
+}
+
+/* Inputs */
+input {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+/* Botón */
+button {
+  width: 100%;
+  padding: 12px;
+  background: #611232;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-weight: bold;
+}
+
+/* Aviso */
+.aviso {
+  color: red;
+  text-align: center;
+  font-size: 12px;
+}
+</style>
+
 </head>
 <body>
 
-  <h2>Generador de Constancia (NO OFICIAL)</h2>
+<div class="header">
+  Gobierno de México
+</div>
 
-  <input type="text" id="nombre" placeholder="Nombre completo"><br><br>
-  <input type="text" id="rfc" placeholder="RFC"><br><br>
-  <input type="text" id="curp" placeholder="CURP"><br><br>
+<div class="container">
+
+  <h2>Constancia de Situación Fiscal</h2>
+
+  <p class="aviso">
+    Simulador académico - NO OFICIAL
+  </p>
+
+  <input type="text" id="nombre" placeholder="Nombre completo">
+  <input type="text" id="rfc" placeholder="RFC">
+  <input type="text" id="curp" placeholder="CURP">
 
   <button onclick="generarPDF()">Generar PDF</button>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</div>
 
-  <script>
-    const { jsPDF } = window.jspdf;
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-    function generarPDF() {
-      const nombre = document.getElementById("nombre").value;
-      const rfc = document.getElementById("rfc").value;
-      const curp = document.getElementById("curp").value;
+<script>
+const { jsPDF } = window.jspdf;
 
-      const doc = new jsPDF();
+function generarPDF() {
+  const nombre = document.getElementById("nombre").value;
+  const rfc = document.getElementById("rfc").value;
+  const curp = document.getElementById("curp").value;
 
-      doc.text("CONSTANCIA DE SITUACIÓN FISCAL", 20, 20);
-      doc.text("(DOCUMENTO OFICIAL)", 20, 30);
+  const doc = new jsPDF();
 
-      doc.text("Nombre: " + nombre, 20, 50);
-      doc.text("RFC: " + rfc, 20, 60);
-      doc.text("CURP: " + curp, 20, 70);
+  doc.setFontSize(14);
+  doc.text("CONSTANCIA DE SITUACIÓN FISCAL", 20, 20);
 
-      doc.save("constancia.pdf");
-    }
-  </script>
+  doc.setFontSize(10);
+  doc.text("Simulador académico - NO OFICIAL", 20, 30);
+
+  doc.text("Nombre: " + nombre, 20, 50);
+  doc.text("RFC: " + rfc, 20, 60);
+  doc.text("CURP: " + curp, 20, 70);
+
+  doc.save("constancia.pdf");
+}
+</script>
 
 </body>
 </html>
