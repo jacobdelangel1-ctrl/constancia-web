@@ -80,56 +80,60 @@ function generarPDF() {
   const rfc = document.getElementById("rfc").value;
   const curp = document.getElementById("curp").value;
 
-  const doc = new jsPDF();
+  const img = new Image();
+  img.src = "fondo.jpg"; // 👈 asegúrate de subir esta imagen a GitHub
 
-  // ENCABEZADO
-  doc.setFillColor(97, 18, 50);
-  doc.rect(0, 0, 210, 15, "F");
+  img.onload = function () {
+    const doc = new jsPDF();
 
-  doc.setTextColor(255,255,255);
-  doc.setFontSize(12);
-  doc.text("Gobierno de México", 10, 10);
+    // 🖼️ FONDO (imagen tipo SAT)
+    doc.addImage(img, "JPEG", 0, 0, 210, 297);
 
-  doc.setTextColor(0,0,0);
+    // TEXTO ENCIMA
+    doc.setFontSize(10);
+    doc.text(nombre, 80, 100);
+    doc.text(rfc, 80, 110);
+    doc.text(curp, 80, 120);
 
-  // TÍTULO
-  doc.setFontSize(14);
-  doc.text("CONSTANCIA DE SITUACIÓN FISCAL", 20, 30);
+    doc.save("constancia.pdf");
+  };
 
-  // FECHA Y FOLIO
-  const fecha = new Date().toLocaleDateString();
-  const folio = Math.floor(Math.random() * 1000000000);
+  // ⚠️ SI NO CARGA LA IMAGEN → usa diseño normal
+  img.onerror = function () {
+    const doc = new jsPDF();
 
-  doc.setFontSize(10);
-  doc.text("Fecha de emisión: " + fecha, 20, 35);
-  doc.text("Folio: " + folio, 140, 35);
+    doc.setFillColor(97, 18, 50);
+    doc.rect(0, 0, 210, 15, "F");
 
-  // LINEA
-  doc.line(20, 40, 190, 40);
+    doc.setTextColor(255,255,255);
+    doc.setFontSize(12);
+    doc.text("Gobierno de México", 10, 10);
 
-  // SECCIÓN
-  doc.setFontSize(11);
-  doc.text("DATOS DEL CONTRIBUYENTE", 20, 50);
+    doc.setTextColor(0,0,0);
 
-  doc.setFontSize(10);
+    doc.setFontSize(14);
+    doc.text("CONSTANCIA DE SITUACIÓN FISCAL", 20, 30);
 
-  doc.text("Nombre:", 20, 60);
-  doc.text(nombre, 80, 60);
+    doc.line(20, 40, 190, 40);
 
-  doc.text("RFC:", 20, 70);
-  doc.text(rfc, 80, 70);
+    doc.setFontSize(11);
+    doc.text("DATOS DEL CONTRIBUYENTE", 20, 50);
 
-  doc.text("CURP:", 20, 80);
-  doc.text(curp, 80, 80);
+    doc.setFontSize(10);
 
-  // CUADRO
-  doc.setLineWidth(0.5);
-  doc.rect(15, 55, 180, 40);
+    doc.text("Nombre:", 20, 60);
+    doc.text(nombre, 80, 60);
 
-  // LINEA EXTRA
-  doc.line(20, 100, 190, 100);
+    doc.text("RFC:", 20, 70);
+    doc.text(rfc, 80, 70);
 
-  doc.save("constancia.pdf");
+    doc.text("CURP:", 20, 80);
+    doc.text(curp, 80, 80);
+
+    doc.rect(15, 55, 180, 40);
+
+    doc.save("constancia.pdf");
+  };
 }
 </script>
 
