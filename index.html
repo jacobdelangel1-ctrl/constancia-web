@@ -26,42 +26,22 @@ body {
   margin: 30px auto;
   padding: 20px;
   border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
 
-h2 {
-  color: #611232;
-  text-align: center;
-}
-
-input {
+input, button {
   width: 100%;
   padding: 10px;
-  margin: 10px 0;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-}
-
-button {
-  width: 100%;
-  padding: 12px;
-  background: #611232;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  font-weight: bold;
+  margin: 8px 0;
 }
 </style>
 
 </head>
 <body>
 
-<div class="header">
-  Gobierno de México
-</div>
+<div class="header">Gobierno de México</div>
 
 <div class="container">
-  <h2>Constancia de Situación Fiscal</h2>
+  <h3>Constancia de Situación Fiscal</h3>
 
   <input type="text" id="nombre" placeholder="Nombre completo">
   <input type="text" id="rfc" placeholder="RFC">
@@ -71,6 +51,8 @@ button {
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode/dist/JsBarcode.all.min.js"></script>
 
 <script>
 const { jsPDF } = window.jspdf;
@@ -80,60 +62,98 @@ function generarPDF() {
   const rfc = document.getElementById("rfc").value;
   const curp = document.getElementById("curp").value;
 
-  const img = new Image();
-  img.src = "fondo.jpg"; // 👈 asegúrate de subir esta imagen a GitHub
+  const doc = new jsPDF();
 
-  img.onload = function () {
-    const doc = new jsPDF();
+  // ===== HEADER =====
+  doc.setFillColor(40,50,55);
+  doc.rect(0,0,210,15,"F");
 
-    // 🖼️ FONDO (imagen tipo SAT)
-    doc.addImage(img, "JPEG", 0, 0, 210, 297);
+  // ===== BLOQUE IZQUIERDO =====
+  doc.rect(15,25,80,60);
+  doc.setFontSize(9);
+  doc.text("CÉDULA DE IDENTIFICACIÓN FISCAL", 18, 30);
 
-    // TEXTO ENCIMA
-    doc.setFontSize(10);
-    doc.text(nombre, 80, 100);
-    doc.text(rfc, 80, 110);
-    doc.text(curp, 80, 120);
+  // QR REAL
+  const qrCanvas = document.createElement("canvas");
+  QRCode.toCanvas(qrCanvas, rfc, function () {
+    const qrImg = qrCanvas.toDataURL("image/png");
+    doc.addImage(qrImg, "PNG", 18, 35, 30, 30);
 
-    doc.save("constancia.pdf");
-  };
+    doc.text("RFC:", 55, 45);
+    doc.text(rfc, 55, 50);
 
-  // ⚠️ SI NO CARGA LA IMAGEN → usa diseño normal
-  img.onerror = function () {
-    const doc = new jsPDF();
+    doc.text("Nombre:", 55, 60);
+    doc.text(nombre, 55, 65);
 
-    doc.setFillColor(97, 18, 50);
-    doc.rect(0, 0, 210, 15, "F");
+    // ===== BLOQUE DERECHO =====
+    doc.rect(105,25,90,12);
+    doc.setFontSize(11);
+    doc.text("CONSTANCIA DE SITUACIÓN FISCAL", 108, 33);
 
-    doc.setTextColor(255,255,255);
-    doc.setFontSize(12);
-    doc.text("Gobierno de México", 10, 10);
+    const fecha = new Date().toLocaleDateString();
 
-    doc.setTextColor(0,0,0);
+    doc.rect(105,40,90,12);
+    doc.setFontSize(9);
+    doc.text("Lugar y Fecha de Emisión", 108, 45);
+    doc.text("México, " + fecha, 108, 50);
 
-    doc.setFontSize(14);
-    doc.text("CONSTANCIA DE SITUACIÓN FISCAL", 20, 30);
+    // ===== CÓDIGO DE BARRAS =====
+    const canvas = document.createElement("canvas");
+    JsBarcode(canvas, rfc, {format: "CODE128"});
+    const barcode = canvas.toDataURL("image/png");
 
-    doc.line(20, 40, 190, 40);
+    doc.addImage(barcode, "PNG", 110, 55, 80, 20);
+
+    // ===== TABLA =====
+    let y = 100;
 
     doc.setFontSize(11);
-    doc.text("DATOS DEL CONTRIBUYENTE", 20, 50);
+    doc.text("Datos de Identificación del Contribuyente:", 15, y);
 
+    y += 10;
     doc.setFontSize(10);
 
-    doc.text("Nombre:", 20, 60);
-    doc.text(nombre, 80, 60);
+    function fila(label, valor) {
+      doc.setFillColor(240,240,240);
+      doc.rect(15, y - 5, 70, 8, "F");
+      doc.rect(85, y - 5, 110, 8);
 
-    doc.text("RFC:", 20, 70);
-    doc.text(rfc, 80, 70);
+      doc.text(label, 17, y);
+      doc.text(valor, 87, y);
 
-    doc.text("CURP:", 20, 80);
-    doc.text(curp, 80, 80);
+      y += 8;
+    }
 
-    doc.rect(15, 55, 180, 40);
+    fila("RFC:", rfc);
+    fila("CURP:", curp);
+    fila("Nombre(s):", nombre);
+    fila("Primer Apellido:", "");
+    fila("Segundo Apellido:", "");
+    fila("Fecha inicio:", "");
+    fila("Estatus:", "");
+    fila("Último cambio:", "");
+    fila("Nombre Comercial:", "");
+
+    y += 5;
+
+    doc.setFontSize(11);
+    doc.text("Datos del domicilio registrado", 15, y);
+
+    y += 10;
+    doc.setFontSize(10);
+
+    fila("Código Postal:", "");
+    fila("Vialidad:", "");
+    fila("Número:", "");
+    fila("Colonia:", "");
+    fila("Municipio:", "");
+    fila("Entidad:", "");
+
+    doc.setFontSize(8);
+    doc.text("Página 1 de 2", 160, 280);
 
     doc.save("constancia.pdf");
-  };
+  });
 }
 </script>
 
