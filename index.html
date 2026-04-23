@@ -1,99 +1,7 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<title>Constancia Fiscal</title>
-
-<style>
-body {
-  font-family: Arial, sans-serif;
-  background: #f0f2f5;
-  margin: 0;
-}
-
-/* Header estilo gobierno */
-.header {
-  background: #611232;
-  color: white;
-  padding: 15px;
-  text-align: center;
-  font-weight: bold;
-}
-
-/* Contenedor tipo documento */
-.container {
-  background: white;
-  width: 90%;
-  max-width: 400px;
-  margin: 30px auto;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
-}
-
-/* Título */
-h2 {
-  color: #611232;
-  text-align: center;
-}
-
-/* Inputs */
-input {
-  width: 100%;
-  padding: 10px;
-  margin: 10px 0;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-}
-
-/* Botón */
-button {
-  width: 100%;
-  padding: 12px;
-  background: #611232;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  font-weight: bold;
-}
-
-/* Aviso */
-.aviso {
-  color: red;
-  text-align: center;
-  font-size: 12px;
-}
-</style>
-
-</head>
-<body>
-
-<div class="header">
-  Gobierno de México
-</div>
-
-<div class="container">
-
-  <h2>Constancia de Situación Fiscal</h2>
-
-
-  </p>
-
-  <input type="text" id="nombre" placeholder="Nombre completo">
-  <input type="text" id="rfc" placeholder="RFC">
-  <input type="text" id="curp" placeholder="CURP">
-
-  <button onclick="generarPDF()">Generar PDF</button>
-
-</div>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
 const { jsPDF } = window.jspdf;
-
-function generarPDF() {
-  const { jsPDF } = window.jspdf;
 
 function generarPDF() {
   const nombre = document.getElementById("nombre").value;
@@ -116,12 +24,10 @@ function generarPDF() {
   doc.setFontSize(14);
   doc.text("CONSTANCIA DE SITUACIÓN FISCAL", 20, 30);
 
-  doc.setFontSize(10);
-
   // LINEA
   doc.line(20, 40, 190, 40);
 
-  // SECCIÓN DATOS
+  // SECCIÓN
   doc.setFontSize(11);
   doc.text("DATOS DEL CONTRIBUYENTE", 20, 50);
 
@@ -136,28 +42,13 @@ function generarPDF() {
   doc.text("CURP:", 20, 80);
   doc.text(curp, 60, 80);
 
-  // CAJAS (tipo formato)
+  // CUADRO
   doc.rect(15, 55, 180, 35);
 
   // PIE
   doc.setFontSize(8);
-
-  doc.save("constancia.pdf");
-}
-  const doc = new jsPDF();
-
-  doc.setFontSize(14);
-  doc.text("CONSTANCIA DE SITUACIÓN FISCAL", 20, 20);
-
-  doc.setFontSize(10);
-
-  doc.text("Nombre: " + nombre, 20, 50);
-  doc.text("RFC: " + rfc, 20, 60);
-  doc.text("CURP: " + curp, 20, 70);
+  doc.text("Documento generado con fines académicos", 20, 270);
 
   doc.save("constancia.pdf");
 }
 </script>
-
-</body>
-</html>
