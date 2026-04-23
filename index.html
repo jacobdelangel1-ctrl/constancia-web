@@ -117,7 +117,6 @@ function generarPDF() {
   doc.text("CONSTANCIA DE SITUACIÓN FISCAL", 20, 30);
 
   doc.setFontSize(10);
-  doc.text("Simulador académico - NO OFICIAL", 20, 36);
 
   // LINEA
   doc.line(20, 40, 190, 40);
@@ -142,7 +141,6 @@ function generarPDF() {
 
   // PIE
   doc.setFontSize(8);
-  doc.text("Documento generado con fines académicos", 20, 270);
 
   doc.save("constancia.pdf");
 }
@@ -152,7 +150,6 @@ function generarPDF() {
   doc.text("CONSTANCIA DE SITUACIÓN FISCAL", 20, 20);
 
   doc.setFontSize(10);
-  doc.text("Simulador académico - NO OFICIAL", 20, 30);
 
   doc.text("Nombre: " + nombre, 20, 50);
   doc.text("RFC: " + rfc, 20, 60);
