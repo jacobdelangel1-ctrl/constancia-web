@@ -14,16 +14,24 @@ app.get("/sat", async (req, res) => {
 
   try {
     console.log("RFC:", rfc);
-console.log("IDCIF:", idcif);
+    console.log("IDCIF:", idcif);
 
-const url = `https://siat.sat.gob.mx/app/qr/faces/pages/mobile/validadorqr.jsf?D1=${rfc}&D2=${idcif}`;
-console.log("URL:", url);
+    const url = `https://siat.sat.gob.mx/app/qr/faces/pages/mobile/validadorqr.jsf?D1=${rfc}&D2=${idcif}`;
+    console.log("URL:", url);
 
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      headers: {
+        "User-Agent": "Mozilla/5.0",
+        "Accept": "text/html",
+        "Accept-Language": "es-MX,es;q=0.9",
+      }
+    });
+
     const text = await response.text();
 
     res.send(text);
   } catch (error) {
+    console.error(error);
     res.json({ error: "Error consultando SAT" });
   }
 });
