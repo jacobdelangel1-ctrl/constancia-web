@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Generador de Constancia</title>
+</head>
+<body>
+
+  <h2>Generador de Constancia (NO OFICIAL)</h2>
+
+  <input type="text" id="nombre" placeholder="Nombre completo"><br><br>
+  <input type="text" id="rfc" placeholder="RFC"><br><br>
+  <input type="text" id="curp" placeholder="CURP"><br><br>
+
+  <button onclick="generarPDF()">Generar PDF</button>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <script>
+    const { jsPDF } = window.jspdf;
+
+    function generarPDF() {
+      const nombre = document.getElementById("nombre").value;
+      const rfc = document.getElementById("rfc").value;
+      const curp = document.getElementById("curp").value;
+
+      const doc = new jsPDF();
+
+      doc.text("CONSTANCIA DE SITUACIÓN FISCAL", 20, 20);
+      doc.text("(DOCUMENTO OFICIAL)", 20, 30);
+
+      doc.text("Nombre: " + nombre, 20, 50);
+      doc.text("RFC: " + rfc, 20, 60);
+      doc.text("CURP: " + curp, 20, 70);
+
+      doc.save("constancia.pdf");
+    }
+  </script>
+
+</body>
+</html>
