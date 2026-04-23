@@ -13,7 +13,11 @@ app.get("/sat", async (req, res) => {
   }
 
   try {
-    const url = `https://siat.sat.gob.mx/app/qr/faces/pages/mobile/validadorqr.jsf?D1=10&D2=1&D3=${rfc}_${idcif}`;
+    console.log("RFC:", rfc);
+console.log("IDCIF:", idcif);
+
+const url = `https://siat.sat.gob.mx/app/qr/faces/pages/mobile/validadorqr.jsf?D1=${rfc}&D2=${idcif}`;
+console.log("URL:", url);
 
     const response = await fetch(url);
     const text = await response.text();
