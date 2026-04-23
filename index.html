@@ -1,3 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Constancia Fiscal</title>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f0f2f5;
+  margin: 0;
+}
+
+.header {
+  background: #611232;
+  color: white;
+  padding: 15px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.container {
+  background: white;
+  width: 90%;
+  max-width: 400px;
+  margin: 30px auto;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+h2 {
+  color: #611232;
+  text-align: center;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  background: #611232;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-weight: bold;
+}
+</style>
+
+</head>
+<body>
+
+<div class="header">
+  Gobierno de México
+</div>
+
+<div class="container">
+  <h2>Constancia de Situación Fiscal</h2>
+
+  <input type="text" id="nombre" placeholder="Nombre completo">
+  <input type="text" id="rfc" placeholder="RFC">
+  <input type="text" id="curp" placeholder="CURP">
+
+  <button onclick="generarPDF()">Generar PDF</button>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
@@ -27,7 +99,7 @@ function generarPDF() {
   // LINEA
   doc.line(20, 40, 190, 40);
 
-  // SECCIÓN
+  // DATOS
   doc.setFontSize(11);
   doc.text("DATOS DEL CONTRIBUYENTE", 20, 50);
 
@@ -45,9 +117,9 @@ function generarPDF() {
   // CUADRO
   doc.rect(15, 55, 180, 35);
 
-  // PIE
-  doc.setFontSize(8);
-
   doc.save("constancia.pdf");
 }
 </script>
+
+</body>
+</html>
