@@ -5,10 +5,12 @@ const puppeteer = require("puppeteer");
 const app = express();
 app.use(cors());
 
+// Ruta base
 app.get("/", (req, res) => {
   res.send("Servidor funcionando 🚀");
 });
 
+// Endpoint SAT → genera PDF
 app.get("/sat", async (req, res) => {
   const { rfc, idcif } = req.query;
 
@@ -22,13 +24,11 @@ app.get("/sat", async (req, res) => {
     const response = await fetch(url);
     const html = await response.text();
 
-    // 🔥 lanzar navegador
     const browser = await puppeteer.launch({
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
 
     const page = await browser.newPage();
-
     await page.setContent(html, { waitUntil: "networkidle0" });
 
     const pdfBuffer = await page.pdf({
@@ -44,7 +44,7 @@ app.get("/sat", async (req, res) => {
 
   } catch (error) {
     console.error(error);
-    res.json({ error: "Error generando PDF" });
+    res.status(500).json({ error: "Error generando PDF" });
   }
 });
 
