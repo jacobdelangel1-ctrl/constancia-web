@@ -4,25 +4,24 @@ const cors = require("cors");
 const app = express();
 app.use(cors());
 
-// ruta base
+// inicio
 app.get("/", (req, res) => {
   res.send("Servidor funcionando 🚀");
 });
 
-// función para limpiar HTML y dejarlo bonito
+// limpiar HTML feo del SAT
 function limpiarHTML(html) {
   return html
     .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
-    .replace(/<img[^>]*>/gi, "") // quita logo roto
-    .replace(/style="[^"]*"/gi, "")
+    .replace(/<img[^>]*>/gi, "")
+    .replace(/style="[^"]*"/gi, "");
 }
 
-// endpoint SAT -> devuelve PDF simple
 app.get("/sat", async (req, res) => {
   const { rfc, idcif } = req.query;
 
   if (!rfc || !idcif) {
-    return res.json({ error: "Faltan datos" });
+    return res.send("<h2>Faltan datos</h2>");
   }
 
   try {
@@ -33,42 +32,71 @@ app.get("/sat", async (req, res) => {
 
     html = limpiarHTML(html);
 
-    // 🔥 armamos PDF en HTML limpio
-    const contenido = `
-      <html>
-      <head>
-        <meta charset="UTF-8">
-        <style>
-          body {
-            font-family: Arial;
-            padding: 20px;
-          }
-          h1 {
-            text-align: center;
-          }
-        </style>
-      </head>
-      <body>
-        <h1>Constancia SAT</h1>
+    const pagina = `
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <title>Constancia SAT</title>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          background: #f4f6f8;
+          padding: 20px;
+        }
+        .container {
+          max-width: 800px;
+          margin: auto;
+          background: white;
+          padding: 30px;
+          border-radius: 10px;
+          box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+          text-align: center;
+          color: #2c3e50;
+        }
+        .btn {
+          display: block;
+          margin: 20px auto;
+          padding: 12px 20px;
+          background: #27ae60;
+          color: white;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+          font-size: 16px;
+        }
+        .btn:hover {
+          background: #219150;
+        }
+        hr {
+          margin: 20px 0;
+        }
+      </style>
+    </head>
+    <body>
+
+      <div class="container">
+        <h1>📄 Constancia de Situación Fiscal</h1>
+
+        <button class="btn" onclick="window.print()">⬇️ Descargar / Imprimir PDF</button>
+
+        <hr>
+
         ${html}
-      </body>
-      </html>
+
+      </div>
+
+    </body>
+    </html>
     `;
 
-    // 👉 aquí NO usamos puppeteer (clave del éxito)
-    res.setHeader("Content-Type", "application/pdf");
-
-    // hack simple: forzamos descarga como PDF
-    res.setHeader(
-      "Content-Disposition",
-      "attachment; filename=constancia.pdf"
-    );
-
-    res.send(Buffer.from(contenido));
+    res.setHeader("Content-Type", "text/html");
+    res.send(pagina);
 
   } catch (error) {
     console.error(error);
-    res.json({ error: "Error consultando SAT" });
+    res.send("<h2>Error consultando SAT</h2>");
   }
 });
 
