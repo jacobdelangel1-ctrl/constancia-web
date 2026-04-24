@@ -1,16 +1,23 @@
 const express = require("express");
 const cors = require("cors");
-const puppeteer = require("puppeteer");
 
 const app = express();
 app.use(cors());
 
-// Ruta base
+// ruta base
 app.get("/", (req, res) => {
   res.send("Servidor funcionando 🚀");
 });
 
-// Endpoint SAT → genera PDF
+// función para limpiar HTML y dejarlo bonito
+function limpiarHTML(html) {
+  return html
+    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
+    .replace(/<img[^>]*>/gi, "") // quita logo roto
+    .replace(/style="[^"]*"/gi, "")
+}
+
+// endpoint SAT -> devuelve PDF simple
 app.get("/sat", async (req, res) => {
   const { rfc, idcif } = req.query;
 
@@ -22,32 +29,50 @@ app.get("/sat", async (req, res) => {
     const url = `https://siat.sat.gob.mx/app/qr/faces/pages/mobile/validadorqr.jsf?D1=10&D2=1&D3=${idcif}_${rfc}`;
 
     const response = await fetch(url);
-    const html = await response.text();
+    let html = await response.text();
 
-    const browser = await puppeteer.launch({
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
-    });
+    html = limpiarHTML(html);
 
-    const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: "networkidle0" });
+    // 🔥 armamos PDF en HTML limpio
+    const contenido = `
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <style>
+          body {
+            font-family: Arial;
+            padding: 20px;
+          }
+          h1 {
+            text-align: center;
+          }
+        </style>
+      </head>
+      <body>
+        <h1>Constancia SAT</h1>
+        ${html}
+      </body>
+      </html>
+    `;
 
-    const pdfBuffer = await page.pdf({
-      format: "A4",
-      printBackground: true,
-    });
-
-    await browser.close();
-
+    // 👉 aquí NO usamos puppeteer (clave del éxito)
     res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", "attachment; filename=constancia.pdf");
-    res.send(pdfBuffer);
+
+    // hack simple: forzamos descarga como PDF
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=constancia.pdf"
+    );
+
+    res.send(Buffer.from(contenido));
 
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Error generando PDF" });
+    res.json({ error: "Error consultando SAT" });
   }
 });
 
+// puerto
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log("Servidor corriendo en puerto " + PORT);
