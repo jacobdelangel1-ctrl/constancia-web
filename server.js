@@ -1,10 +1,10 @@
 const express = require("express");
 const cors = require("cors");
+const puppeteer = require("puppeteer");
 
 const app = express();
 app.use(cors());
 
-// ruta base
 app.get("/", (req, res) => {
   res.send("Servidor funcionando 🚀");
 });
@@ -17,25 +17,34 @@ app.get("/sat", async (req, res) => {
   }
 
   try {
-    console.log("RFC:", rfc);
-    console.log("IDCIF:", idcif);
-
     const url = `https://siat.sat.gob.mx/app/qr/faces/pages/mobile/validadorqr.jsf?D1=10&D2=1&D3=${idcif}_${rfc}`;
 
-    const response = await fetch(url, {
-      headers: {
-        "User-Agent": "Mozilla/5.0",
-        "Accept": "text/html",
-        "Accept-Language": "es-MX,es;q=0.9",
-      }
+    const response = await fetch(url);
+    const html = await response.text();
+
+    // 🔥 lanzar navegador
+    const browser = await puppeteer.launch({
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
 
-    const text = await response.text();
+    const page = await browser.newPage();
 
-    res.send(text);
+    await page.setContent(html, { waitUntil: "networkidle0" });
+
+    const pdfBuffer = await page.pdf({
+      format: "A4",
+      printBackground: true,
+    });
+
+    await browser.close();
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", "attachment; filename=constancia.pdf");
+    res.send(pdfBuffer);
+
   } catch (error) {
     console.error(error);
-    res.json({ error: "Error consultando SAT" });
+    res.json({ error: "Error generando PDF" });
   }
 });
 
