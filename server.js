@@ -1,23 +1,51 @@
 const express = require("express");
+const QRCode = require("qrcode");
 const app = express();
 
+// 🔐 Validación básica RFC (México)
+function validarRFC(rfc) {
+  return /^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}$/.test(rfc);
+}
+
+// 🧠 Escapar HTML
 function escapeHtml(text) {
   return String(text)
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
+    .replace(/>/g, "&gt;");
 }
+
+// 🧾 Base de datos simulada
+const db = {
+  "GAHH970828RN3": {
+    nombre: "ANGEL HERNANDEZ",
+    regimen: "Plataformas Digitales",
+    domicilio: "CAMPECHE, MEXICO",
+    estatus: "ACTIVO"
+  }
+};
 
 app.get("/", (req, res) => {
   res.send("Servidor funcionando 🚀");
 });
 
-// 🔥 NUEVA RUTA /sat
-app.get("/sat", (req, res) => {
-  const rfc = escapeHtml(req.query.rfc || "NO DEFINIDO");
-  const idcif = escapeHtml(req.query.idcif || "NO DEFINIDO");
+// 🔥 Ruta principal
+app.get("/sat", async (req, res) => {
+  let rfc = (req.query.rfc || "").toUpperCase();
+  let idcif = req.query.idcif || "NO DEFINIDO";
+
+  const valido = validarRFC(rfc);
+
+  const data = db[rfc] || {
+    nombre: "NO REGISTRADO",
+    regimen: "SIN INFORMACIÓN",
+    domicilio: "NO DISPONIBLE",
+    estatus: "INACTIVO"
+  };
+
+  // 📱 QR con el mismo link
+  const url = `https://${req.headers.host}/sat?rfc=${rfc}&idcif=${idcif}`;
+  const qr = await QRCode.toDataURL(url);
 
   res.send(`
   <!DOCTYPE html>
@@ -30,28 +58,27 @@ app.get("/sat", (req, res) => {
     <style>
       body {
         margin: 0;
-        font-family: Arial, sans-serif;
+        font-family: Arial;
         background: #eef2f7;
       }
 
-      .container {
-        max-width: 700px;
-        margin: 40px auto;
+      .card {
+        max-width: 750px;
+        margin: 30px auto;
         background: white;
-        border-radius: 16px;
+        border-radius: 15px;
         overflow: hidden;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
       }
 
       .header {
         background: linear-gradient(135deg, #0f172a, #1e293b);
         color: white;
-        padding: 30px;
+        padding: 25px;
       }
 
       .header h1 {
         margin: 0;
-        font-size: 28px;
       }
 
       .content {
@@ -59,53 +86,53 @@ app.get("/sat", (req, res) => {
       }
 
       .box {
-        background: #f8fafc;
         border: 1px solid #e5e7eb;
-        border-radius: 12px;
+        border-radius: 10px;
         padding: 15px;
         margin-bottom: 15px;
+        background: #f9fafb;
       }
 
       .label {
         font-size: 12px;
         color: #6b7280;
-        margin-bottom: 5px;
       }
 
       .value {
-        font-size: 20px;
+        font-size: 18px;
         font-weight: bold;
-        word-break: break-word;
-      }
-
-      .link {
-        color: blue;
-        text-decoration: underline;
       }
 
       .status {
         display: inline-block;
-        background: #dcfce7;
-        color: #166534;
         padding: 6px 12px;
         border-radius: 20px;
+        background: ${data.estatus === "ACTIVO" ? "#dcfce7" : "#fee2e2"};
+        color: ${data.estatus === "ACTIVO" ? "#166534" : "#991b1b"};
         font-weight: bold;
         margin-top: 10px;
       }
 
-      .footer {
+      .qr {
         text-align: center;
-        font-size: 13px;
-        color: #9ca3af;
-        padding: 15px;
+        margin-top: 20px;
+      }
+
+      .qr img {
+        width: 120px;
+      }
+
+      .error {
+        color: red;
+        font-weight: bold;
       }
     </style>
   </head>
 
   <body>
 
-    <div class="container">
-      
+    <div class="card">
+
       <div class="header">
         <h1>Consulta Fiscal</h1>
       </div>
@@ -114,22 +141,37 @@ app.get("/sat", (req, res) => {
 
         <div class="box">
           <div class="label">RFC</div>
-          <div class="value">${rfc}</div>
+          <div class="value">${escapeHtml(rfc)}</div>
+          ${!valido ? '<div class="error">RFC inválido</div>' : ''}
         </div>
 
         <div class="box">
           <div class="label">ID CIF</div>
-          <div class="value">
-            <a class="link" href="#">${idcif}</a>
-          </div>
+          <div class="value">${escapeHtml(idcif)}</div>
         </div>
 
-        <div class="status">ACTIVO</div>
+        <div class="box">
+          <div class="label">Nombre</div>
+          <div class="value">${data.nombre}</div>
+        </div>
 
-      </div>
+        <div class="box">
+          <div class="label">Régimen</div>
+          <div class="value">${data.regimen}</div>
+        </div>
 
-      <div class="footer">
-        Consulta generada por sistema web
+        <div class="box">
+          <div class="label">Domicilio</div>
+          <div class="value">${data.domicilio}</div>
+        </div>
+
+        <div class="status">${data.estatus}</div>
+
+        <div class="qr">
+          <p>Escanear QR</p>
+          <img src="${qr}">
+        </div>
+
       </div>
 
     </div>
